@@ -1,4 +1,4 @@
-name: Deploy Python File to EC2
+name: Deploy Java Project to EC2
 
 on:
   push:
@@ -18,16 +18,16 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      - name: Copy Python File to EC2
+      - name: Copy Java Project to EC2
         run: |
-          scp -o StrictHostKeyChecking=no \
+          scp -r -o StrictHostKeyChecking=no \
           -i private_key.pem \
-          numbers_analysis.py \
+          java-project \
           ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
 
-      - name: Execute Python File on EC2
+      - name: Verify Files on EC2
         run: |
           ssh -o StrictHostKeyChecking=no \
           -i private_key.pem \
           ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-          "python3 /home/ubuntu/numbers_analysis.py"
+          "ls -R /home/ubuntu/java-project"
