@@ -1,4 +1,4 @@
-name: Python Demo
+name: Deploy Python File to EC2
 
 on:
   push:
@@ -6,15 +6,28 @@ on:
       - main
 
 jobs:
-
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+      - name: Create SSH Key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
-      - name: Run Python
+      - name: Copy Python File to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no \
+          -i private_key.pem \
+          numbers_analysis.py \
+          ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
 
-        run: python python/numbers_analysis.py
+      - name: Execute Python File on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+          -i private_key.pem \
+          ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
+          "python3 /home/ubuntu/numbers_analysis.py"
