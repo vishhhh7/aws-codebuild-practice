@@ -17,4 +17,4 @@ jobs:
 
       - name: Run Python
 
-        run: python numbers_analysis.py
+        run: python python/numbers_analysis.py
